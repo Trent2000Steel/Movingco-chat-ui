@@ -94,7 +94,7 @@
       });
 
       const data = await response.json();
-      const botReply = data.reply;
+const botReply = JSON.stringify(data);  // Show raw response
       addMessage(botReply, 'bot');
     };
   </script>
