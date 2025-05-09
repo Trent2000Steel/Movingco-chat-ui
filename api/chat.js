@@ -26,7 +26,12 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+
     if (!data.choices || !data.choices.length) {
+      console.log("OpenAI raw response:", data);  // Debug output
       throw new Error("No reply from OpenAI");
     }
 
