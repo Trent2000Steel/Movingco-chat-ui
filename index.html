@@ -58,6 +58,18 @@
       border: none;
       cursor: pointer;
     }
+    footer {
+      text-align: center;
+      font-size: 0.9em;
+      padding: 15px;
+      background: #f0f0f0;
+      border-top: 1px solid #ccc;
+    }
+    footer a {
+      margin: 0 10px;
+      color: #555;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
@@ -66,6 +78,11 @@
     <input type="text" id="input" placeholder="Ask your MoveSafe Concierge..." />
     <button id="send">Send</button>
   </div>
+
+  <footer>
+    <a href="/terms.html">Terms of Service</a> |
+    <a href="/privacy.html">Privacy Policy</a>
+  </footer>
 
   <script>
     const chat = document.getElementById('chat');
@@ -92,8 +109,8 @@ Once you have those, pause. Then when ready, deliver ONLY the quote. The fronten
 Your quote should sound like this:
 "Based on your route, timing, and verified labor, your MoveSafe estimate is between $X,XXX–$X,XXX. That includes full coordination under the MoveSafe Method™—our 5-point system for smoother, safer long-distance moves."
 
-After that, softly close with:
-"If that sounds reasonable, you can reserve your date with an $85 deposit. You’ll get a concierge call with a real human to confirm your inventory and lock in final flat-rate pricing."
+Then close with:
+"If that sounds reasonable, you can reserve your date with an $85 deposit. You’ll get a concierge call with a real human to confirm everything and lock in your flat rate. Would you like to schedule your move, or do you have any questions first?"
 
 Never mention U-Pack or tools. Don’t sound like a bot. You’re here to close calmly and helpfully.`
       }
