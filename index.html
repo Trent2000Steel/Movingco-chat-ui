@@ -78,26 +78,34 @@
       chat.scrollTop = chat.scrollHeight;
     };
 
-    send.onclick = async () => {
+    const sendMessage = async () => {
       const userMessage = input.value.trim();
       if (!userMessage) return;
 
       addMessage(userMessage, 'user');
       input.value = '';
 
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt: userMessage })
-      });
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prompt: userMessage })
+        });
 
-      const data = await response.json();
-const botReply = JSON.stringify(data);  // TEMP DEBUG MODE
-      const botReply = data.reply || "[No reply]";
-      addMessage(botReply, 'bot');
+        const data = await response.json();
+        const botReply = data.reply || "[No reply]";
+        addMessage(botReply, 'bot');
+      } catch (err) {
+        addMessage("[Error sending message]", 'bot');
+      }
     };
+
+    send.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
   </script>
 </body>
 </html>
