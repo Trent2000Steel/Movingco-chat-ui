@@ -106,6 +106,9 @@
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') sendMessage();
     });
+    window.addEventListener('DOMContentLoaded', () => {
+  addMessage("Hi there, I’m your MovingCo concierge. Where are you moving from and to?", 'bot');
+});
   </script>
 </body>
 </html>
