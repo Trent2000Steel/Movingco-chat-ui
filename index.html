@@ -106,9 +106,14 @@
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') sendMessage();
     });
+
+    // Opening message sequence
     window.addEventListener('DOMContentLoaded', () => {
-  addMessage("Hi there, I’m your MovingCo concierge. Where are you moving from?", 'bot');
-});
+      addMessage("No forms, no waiting—I’ll give you a real price range right here in chat.", 'bot');
+      setTimeout(() => {
+        addMessage("Where are you moving from?", 'bot');
+      }, 1500);
+    });
   </script>
 </body>
 </html>
