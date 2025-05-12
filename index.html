@@ -79,29 +79,36 @@
 
 Your tone is friendly, efficient, and professional—like someone who's done this a thousand times. You don't ramble or sound like a bot. You ask only what’s needed to build a fast, accurate quote.
 
-Start the chat with a short welcome and ask:
+Start with a brief welcome. Then ask:
 "Where are you moving from?"
 
-As the conversation continues, gather:
-- Move size (e.g. 1-bedroom apartment, 3-bedroom house)
+Continue collecting:
+- Move destination
+- Move size
 - Move date or timing
 - Whether they need help loading, unloading, or both
 
-Once you know the route and size, say:
-“Okay, hang tight—I’m checking route availability and confirming pricing with our top-rated movers for that corridor…”
+Once you’ve gathered these, ask:
+“Any fragile or special items you'd want us to handle with extra care?”
 
-Then follow up with a clear quote:
-“Alright, based on your move from {{origin}} to {{destination}} and the size you gave me, here’s your quote range: $X,XXX–$X,XXX.”
+Wait for their answer. Then proceed with the quote using this flow:
 
-Use a price range unless asked for a flat rate. Only give a quote once you have route + size. Keep it realistic, not pushy.
+First reply:
+"Scanning route corridors and pricing history…"
 
-If they ask what’s included, say:
-“The MoveSafe Method™ includes verified movers, smart quoting, a human review board, pro-level coordination, and a money-back guarantee.”
+Second reply (1.2s later):
+"Filtering movers with 4.5 stars and higher..."
 
-If they’re ready, explain:
-“To reserve your date, it’s an $85 deposit. That gets you a concierge call, full inventory confirmation, and final flat-rate pricing. If you decide not to move forward—or if we can’t coordinate it—we’ll refund the deposit.”
+Third reply (1.4s later):
+"Analyzing similar moves from the last 90 days..."
 
-Never mention third-party names like U-Pack or any internal tools. You represent MovingCo. Keep it clear, confident, and in control.`
+Then finally, deliver the quote in a separate message:
+"Based on your move from {{origin}} to {{destination}} and the size you gave me, here’s your quote range: $X,XXX–$X,XXX."
+
+If the customer asks what’s included, explain:
+"That quote includes full coordination under the MoveSafe Method™—our 5-point system for verified movers, smart quoting, a human review board, pro-level coordination, and a money-back guarantee."
+
+Never mention U-Pack or any third-party tools. You represent MovingCo. You’re calm, helpful, and always in control.`
       }
     ];
 
@@ -111,6 +118,20 @@ Never mention third-party names like U-Pack or any internal tools. You represent
       msg.textContent = text;
       chat.appendChild(msg);
       chat.scrollTop = chat.scrollHeight;
+    };
+
+    const displayWithDelays = (stagedLines, finalReply) => {
+      const delayTimes = [1000, 1200, 1400];
+      stagedLines.forEach((line, index) => {
+        setTimeout(() => {
+          addMessage(line, 'bot');
+        }, delayTimes.slice(0, stagedLines.length)[index]);
+      });
+      const totalDelay = delayTimes.slice(0, stagedLines.length).reduce((a, b) => a + b, 0);
+      setTimeout(() => {
+        addMessage(finalReply, 'bot');
+        messages.push({ role: 'assistant', content: finalReply });
+      }, totalDelay + 500);
     };
 
     const sendMessage = async () => {
@@ -131,9 +152,19 @@ Never mention third-party names like U-Pack or any internal tools. You represent
         });
 
         const data = await response.json();
-        const botReply = data.reply || "[No reply]";
-        messages.push({ role: 'assistant', content: botReply });
-        addMessage(botReply, 'bot');
+        const raw = data.reply || "[No reply]";
+
+        // If GPT gives a quote (detected by phrase), delay delivery
+        if (raw.toLowerCase().includes("here’s your quote range")) {
+          displayWithDelays([
+            "Scanning route corridors and pricing history...",
+            "Filtering movers with 4.5 stars and higher...",
+            "Analyzing similar moves from the last 90 days..."
+          ], raw);
+        } else {
+          addMessage(raw, 'bot');
+          messages.push({ role: 'assistant', content: raw });
+        }
       } catch (err) {
         addMessage("[Error sending message]", 'bot');
       }
