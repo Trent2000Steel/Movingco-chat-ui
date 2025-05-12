@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,6 +28,20 @@
       margin: 4px 0 0;
       font-size: 13px;
       color: #666;
+    }
+    .trust-line {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #3A73B1;
+    }
+    #booking-status {
+      text-align: center;
+      background-color: #ffe0e0;
+      color: #a33;
+      padding: 8px;
+      font-weight: bold;
+      font-size: 14px;
+      border-bottom: 1px solid #ddd;
     }
     main {
       flex: 1;
@@ -105,7 +118,10 @@
   <header>
     <h1>M O V I N G C O</h1>
     <p>Powered by the MoveSafe Method™</p>
+    <div class="trust-line" id="trust-line"></div>
   </header>
+
+  <div id="booking-status">Booking Status: Not Reserved</div>
 
   <div class="watermark">MOVINGCO</div>
 
@@ -129,6 +145,16 @@
     const chat = document.getElementById('chat');
     const form = document.getElementById('form');
     const input = document.getElementById('input');
+    const trustLine = document.getElementById('trust-line');
+
+    const testimonials = [
+      "★ “Everything arrived safely and on time.” – Jason M.",
+      "★ “I booked right after the quote.” – Erin T.",
+      "★ “Flat-rate, no stress. Just moved and done.” – Devon S.",
+      "★ “I didn’t lift a finger. Concierge was amazing.” – Maria L.",
+      "★ “Worth every dollar. Smoothest move ever.” – James K."
+    ];
+    trustLine.textContent = testimonials[Math.floor(Math.random() * testimonials.length)];
 
     function addMessage(content, className) {
       const msg = document.createElement('div');
