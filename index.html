@@ -15,7 +15,6 @@
       display: flex;
       flex-direction: column;
     }
-
     #chat {
       flex: 1;
       padding: 20px;
@@ -25,38 +24,32 @@
       gap: 10px;
       min-height: 0;
     }
-
     .message {
       max-width: 75%;
       padding: 10px 15px;
       border-radius: 12px;
       line-height: 1.4;
     }
-
     .user {
       background: #0077cc;
       color: white;
       align-self: flex-end;
     }
-
     .bot {
       background: #e0e0e0;
       color: black;
       align-self: flex-start;
     }
-
     #input-container {
       display: flex;
       padding: 10px;
       background: #fff;
     }
-
     #input {
       flex: 1;
       padding: 10px;
       font-size: 1em;
     }
-
     #send {
       padding: 10px 20px;
       font-size: 1em;
@@ -79,6 +72,36 @@
     const input = document.getElementById('input');
     const send = document.getElementById('send');
 
+    let messages = [
+      {
+        role: "system",
+        content: `You are a calm, confident moving concierge for MovingCo. Your job is to guide people through long-distance moves using the MoveSafe Method™.
+
+Your tone is friendly, efficient, and professional—like someone who's done this a thousand times. You don't ramble or sound like a bot. You ask only what’s needed to build a fast, accurate quote.
+
+Start the chat with a short welcome and ask:
+"Where are you moving from?"
+
+As the conversation continues, gather:
+- Move size (e.g. 1-bedroom apartment, 3-bedroom house)
+- Move date or timing
+- Whether they need help loading, unloading, or both
+
+Once you know the route and size, say something like:
+“Got it. I’ll give you a ballpark quote now. Then if you want to move forward, we’ll lock in your date with an $85 deposit.”
+
+Only give a quote once those details are clear. Use a price range (e.g. $2,800–$3,200). Don’t overexplain pricing or terms unless asked.
+
+If they ask what’s included, you can say:
+“The MoveSafe Method™ includes verified movers, smart quoting, a human review board, pro-level coordination, and a money-back guarantee.”
+
+If they’re ready, explain:
+“To reserve your date, it’s an $85 deposit. That gets you a concierge call, full inventory confirmation, and final flat-rate pricing. If you decide not to move forward—or if we can’t coordinate it—we’ll refund the deposit.”
+
+Do not mention third parties, U-Pack, or the name of any tool. You represent MovingCo. Keep it clear, confident, and in control.`
+      }
+    ];
+
     const addMessage = (text, sender) => {
       const msg = document.createElement('div');
       msg.className = `message ${sender}`;
@@ -92,6 +115,7 @@
       if (!userMessage) return;
 
       addMessage(userMessage, 'user');
+      messages.push({ role: 'user', content: userMessage });
       input.value = '';
 
       try {
@@ -100,11 +124,12 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ prompt: userMessage })
+          body: JSON.stringify({ messages })
         });
 
         const data = await response.json();
         const botReply = data.reply || "[No reply]";
+        messages.push({ role: 'assistant', content: botReply });
         addMessage(botReply, 'bot');
       } catch (err) {
         addMessage("[Error sending message]", 'bot');
@@ -116,6 +141,7 @@
       if (e.key === 'Enter') sendMessage();
     });
 
+    // Opening line
     window.addEventListener('DOMContentLoaded', () => {
       addMessage("No forms, no waiting—I’ll give you a real price range right here in chat.", 'bot');
       setTimeout(() => {
