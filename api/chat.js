@@ -1,5 +1,9 @@
 export default async function handler(req, res) {
-  const { prompt } = req.body;
+  const prompt = req.body?.prompt;
+
+  if (!prompt) {
+    return res.status(400).json({ reply: "Missing prompt in request." });
+  }
 
   if (!process.env.OPENAI_API_KEY) {
     return res.status(500).json({ reply: "Missing API key" });
@@ -42,7 +46,10 @@ If they’re ready, explain:
 
 Do not mention third parties, U-Pack, or the name of any tool. You represent MovingCo. Keep it clear, confident, and in control.`
           },
-          { role: "user", content: prompt },
+          {
+            role: "user",
+            content: prompt
+          }
         ],
       }),
     });
