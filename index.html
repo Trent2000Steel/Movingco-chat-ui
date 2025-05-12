@@ -17,22 +17,29 @@
     }
 
     #branding {
-      text-align: center;
-      padding: 20px 10px 10px;
-      border-bottom: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 15px 20px 10px;
       background: #fff;
+      border-bottom: 1px solid #ddd;
+      box-shadow: inset 0 -1px 0 #e0e0e0;
     }
 
     #branding h1 {
       margin: 0;
-      font-size: 1.6em;
+      font-size: 1.4em;
+      letter-spacing: 0.35em;
       color: #222;
+      font-weight: 700;
+      text-shadow: 0.5px 0.5px 0 #ccc;
     }
 
     #branding p {
-      margin: 5px 0 0;
-      font-size: 0.9em;
+      margin: 4px 0 0;
+      font-size: 0.85em;
       color: #666;
+      font-weight: 400;
     }
 
     #chat {
@@ -43,6 +50,8 @@
       flex-direction: column;
       gap: 10px;
       min-height: 0;
+      background: url('/movingco-watermark.png') center center no-repeat;
+      background-size: 200px;
     }
 
     .message {
@@ -102,7 +111,7 @@
 </head>
 <body>
   <div id="branding">
-    <h1>MovingCo</h1>
+    <h1>M O V I N G C O</h1>
     <p>Powered by the MoveSafe Method™</p>
   </div>
 
