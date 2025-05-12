@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     // DEBUG: return the whole OpenAI response to the browser
-    return res.status(200).json({ raw: data });
+return res.status(200).json({ reply: data.choices[0].message.content });
 
   } catch (err) {
     return res.status(500).json({ reply: "Error: " + err.message });
