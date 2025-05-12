@@ -14,13 +14,19 @@
       flex-direction: column;
       height: 100vh;
     }
-    #chat {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    html, body {
+  height: 100%;
+  overflow: hidden;
+}
+   #chat {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
     }
     .message {
       max-width: 75%;
