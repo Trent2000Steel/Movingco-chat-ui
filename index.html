@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MovingCo Concierge</title>
+  <title>MoveSafe Concierge</title>
   <style>
     html, body {
       height: 100%;
@@ -63,7 +63,7 @@
 <body>
   <div id="chat"></div>
   <div id="input-container">
-    <input type="text" id="input" placeholder="Ask about your move..." />
+    <input type="text" id="input" placeholder="Ask your MoveSafe Concierge..." />
     <button id="send">Send</button>
   </div>
 
@@ -75,19 +75,27 @@
     let messages = [
       {
         role: "system",
-        content: `You are a calm, confident moving concierge for MovingCo. You guide people through long-distance moves using the MoveSafe Method™.
+        content: `You are a calm, confident MoveSafe Concierge for MovingCo. Your job is to guide people through long-distance moves using the MoveSafe Method™.
 
-Your tone is friendly, efficient, and professional. Ask only what’s needed to build a fast, accurate quote.
+Speak like a seasoned pro—efficient, helpful, no small talk. Ask only what’s needed to build a fast, accurate quote.
 
-Collect in this order:
+Gather in this order:
 1. Move origin (city)
 2. Destination
 3. Move size
 4. Move date/timing
 5. Load/unload help
-6. Special/fragile items
+6. Special or fragile items
 
-DO NOT generate a quote until the user has answered all of the above. When it's time to quote, reply with ONLY the quote and what's included. Keep it brief. The frontend will handle the trust-building messages.`
+Once you have those, pause. Then when ready, deliver ONLY the quote. The frontend handles the trust-building steps.
+
+Your quote should sound like this:
+"Based on your route, timing, and verified labor, your MoveSafe estimate is between $X,XXX–$X,XXX. That includes full coordination under the MoveSafe Method™—our 5-point system for smoother, safer long-distance moves."
+
+After that, softly close with:
+"If that sounds reasonable, you can reserve your date with an $85 deposit. You’ll get a concierge call with a real human to confirm your inventory and lock in final flat-rate pricing."
+
+Never mention U-Pack or tools. Don’t sound like a bot. You’re here to close calmly and helpfully.`
       }
     ];
 
@@ -102,40 +110,33 @@ DO NOT generate a quote until the user has answered all of the above. When it's 
     };
 
     const sendQuoteRequest = async () => {
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages })
-        });
-
-        const data = await response.json();
-        const quoteReply = data.reply || "[No reply]";
-        addMessage(quoteReply, 'bot');
-        messages.push({ role: 'assistant', content: quoteReply });
-        awaitingQuote = false;
-      } catch (err) {
-        addMessage("[Error getting quote. Please try again.]", 'bot');
-      }
-    };
-
-    const simulateTrustSequence = () => {
       const steps = [
-        "Scanning route corridors and pricing history...",
-        "Filtering movers with 4.5 stars and higher...",
-        "Analyzing similar moves from the last 90 days..."
+        "Analyzing current route conditions...",
+        "Filtering verified movers with 4.5 stars or higher...",
+        "Scanning pricing trends from the past 90 days..."
       ];
 
       steps.forEach((line, index) => {
-        setTimeout(() => {
-          addMessage(line, 'bot');
-        }, index * 1200);
+        setTimeout(() => addMessage(line, 'bot'), index * 1200);
       });
 
-      // Trigger the actual quote after the last delay
-      setTimeout(() => {
-        sendQuoteRequest();
-      }, steps.length * 1200 + 1000);
+      setTimeout(async () => {
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages })
+          });
+
+          const data = await response.json();
+          const quote = data.reply || "[No reply]";
+          addMessage(quote, 'bot');
+          messages.push({ role: 'assistant', content: quote });
+          awaitingQuote = false;
+        } catch (err) {
+          addMessage("[Error getting quote. Please try again.]", 'bot');
+        }
+      }, steps.length * 1200 + 500);
     };
 
     const sendMessage = async () => {
@@ -147,7 +148,7 @@ DO NOT generate a quote until the user has answered all of the above. When it's 
       input.value = '';
 
       if (awaitingQuote) {
-        simulateTrustSequence();
+        sendQuoteRequest();
         return;
       }
 
@@ -180,16 +181,14 @@ DO NOT generate a quote until the user has answered all of the above. When it's 
     });
 
     window.addEventListener('DOMContentLoaded', () => {
-      addMessage("No forms, no waiting—I’ll give you a real price range right here in chat.", 'bot');
+      addMessage("Hi—I’m your MoveSafe Concierge.", 'bot');
+      setTimeout(() => {
+        addMessage("No forms, no spam—I’ll give you a real price range right here in chat.", 'bot');
+      }, 1000);
       setTimeout(() => {
         addMessage("What city are you moving from?", 'bot');
-      }, 1500);
+      }, 2500);
     });
   </script>
-<footer style="text-align: center; font-size: 0.9em; padding: 15px; background: #f0f0f0; border-top: 1px solid #ccc;">
-  <a href="/terms.html" style="margin: 0 10px; color: #555; text-decoration: none;">Terms of Service</a>
-  |
-  <a href="/privacy.html" style="margin: 0 10px; color: #555; text-decoration: none;">Privacy Policy</a>
-</footer>
 </body>
 </html>
