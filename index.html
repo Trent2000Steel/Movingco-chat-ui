@@ -3,18 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MoveSafe Concierge</title>
+  <title>MoveSafe Concierge | MovingCo</title>
   <style>
     html, body {
       height: 100%;
       margin: 0;
       padding: 0;
       overflow: hidden;
-      font-family: sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background: #f4f4f4;
       display: flex;
       flex-direction: column;
     }
+
+    #branding {
+      text-align: center;
+      padding: 20px 10px 10px;
+      border-bottom: 1px solid #ddd;
+      background: #fff;
+    }
+
+    #branding h1 {
+      margin: 0;
+      font-size: 1.6em;
+      color: #222;
+    }
+
+    #branding p {
+      margin: 5px 0 0;
+      font-size: 0.9em;
+      color: #666;
+    }
+
     #chat {
       flex: 1;
       padding: 20px;
@@ -24,40 +44,47 @@
       gap: 10px;
       min-height: 0;
     }
+
     .message {
       max-width: 75%;
       padding: 10px 15px;
       border-radius: 12px;
       line-height: 1.4;
     }
+
     .user {
-      background: #0077cc;
+      background: #3A73B1;
       color: white;
       align-self: flex-end;
     }
+
     .bot {
       background: #e0e0e0;
       color: black;
       align-self: flex-start;
     }
+
     #input-container {
       display: flex;
       padding: 10px;
       background: #fff;
     }
+
     #input {
       flex: 1;
       padding: 10px;
       font-size: 1em;
     }
+
     #send {
       padding: 10px 20px;
       font-size: 1em;
-      background: #0077cc;
+      background: #3A73B1;
       color: white;
       border: none;
       cursor: pointer;
     }
+
     footer {
       text-align: center;
       font-size: 0.9em;
@@ -65,15 +92,22 @@
       background: #f0f0f0;
       border-top: 1px solid #ccc;
     }
+
     footer a {
       margin: 0 10px;
-      color: #555;
+      color: #3A73B1;
       text-decoration: none;
     }
   </style>
 </head>
 <body>
+  <div id="branding">
+    <h1>MovingCo</h1>
+    <p>Powered by the MoveSafe Method™</p>
+  </div>
+
   <div id="chat"></div>
+
   <div id="input-container">
     <input type="text" id="input" placeholder="Ask your MoveSafe Concierge..." />
     <button id="send">Send</button>
