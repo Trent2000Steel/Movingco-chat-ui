@@ -1,23 +1,127 @@
-const sendMessage = async () => {
-  const userMessage = input.value.trim();
-  if (!userMessage) return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MovingCo Concierge</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+    }
 
-  addMessage(userMessage, 'user');
-  input.value = '';
+    #chat {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+    }
 
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt: userMessage })
+    .message {
+      max-width: 75%;
+      padding: 10px 15px;
+      border-radius: 12px;
+      line-height: 1.4;
+    }
+
+    .user {
+      background: #0077cc;
+      color: white;
+      align-self: flex-end;
+    }
+
+    .bot {
+      background: #e0e0e0;
+      color: black;
+      align-self: flex-start;
+    }
+
+    #input-container {
+      display: flex;
+      padding: 10px;
+      background: #fff;
+    }
+
+    #input {
+      flex: 1;
+      padding: 10px;
+      font-size: 1em;
+    }
+
+    #send {
+      padding: 10px 20px;
+      font-size: 1em;
+      background: #0077cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat"></div>
+  <div id="input-container">
+    <input type="text" id="input" placeholder="Ask about your move..." />
+    <button id="send">Send</button>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('input');
+    const send = document.getElementById('send');
+
+    const addMessage = (text, sender) => {
+      const msg = document.createElement('div');
+      msg.className = `message ${sender}`;
+      msg.textContent = text;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    };
+
+    const sendMessage = async () => {
+      const userMessage = input.value.trim();
+      if (!userMessage) return;
+
+      addMessage(userMessage, 'user');
+      input.value = '';
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prompt: userMessage })
+        });
+
+        const data = await response.json();
+        const botReply = data.reply || "[No reply]";
+        addMessage(botReply, 'bot');
+      } catch (err) {
+        addMessage("[Error sending message]", 'bot');
+      }
+    };
+
+    send.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendMessage();
     });
 
-    const data = await response.json();
-    const botReply = data.reply || "[No reply]";
-    addMessage(botReply, 'bot');
-  } catch (err) {
-    addMessage("[Error sending message]", 'bot');
-  }
-};
+    window.addEventListener('DOMContentLoaded', () => {
+      addMessage("No forms, no waiting—I’ll give you a real price range right here in chat.", 'bot');
+      setTimeout(() => {
+        addMessage("Where are you moving from?", 'bot');
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
