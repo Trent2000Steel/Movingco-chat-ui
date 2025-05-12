@@ -75,42 +75,23 @@
     let messages = [
       {
         role: "system",
-        content: `You are a calm, confident moving concierge for MovingCo. Your job is to guide people through long-distance moves using the MoveSafe Method™.
+        content: `You are a calm, confident moving concierge for MovingCo. You guide people through long-distance moves using the MoveSafe Method™.
 
-Your tone is friendly, efficient, and professional—like someone who's done this a thousand times. You don't ramble or sound like a bot. You ask only what’s needed to build a fast, accurate quote.
+Your tone is friendly, efficient, and professional. Ask only what’s needed to build a fast, accurate quote.
 
-Start with a brief welcome. Then ask:
-"Where are you moving from?"
+Collect in this order:
+1. Move origin (city)
+2. Destination
+3. Move size
+4. Move date/timing
+5. Load/unload help
+6. Special/fragile items
 
-Continue collecting:
-- Move destination
-- Move size
-- Move date or timing
-- Whether they need help loading, unloading, or both
-
-Once you’ve gathered these, ask:
-“Any fragile or special items you'd want us to handle with extra care?”
-
-Wait for their answer. Then proceed with the quote using this flow:
-
-First reply:
-"Scanning route corridors and pricing history…"
-
-Second reply (1.2s later):
-"Filtering movers with 4.5 stars and higher..."
-
-Third reply (1.4s later):
-"Analyzing similar moves from the last 90 days..."
-
-Then finally, deliver the quote in a separate message:
-"Based on your move from {{origin}} to {{destination}} and the size you gave me, here’s your quote range: $X,XXX–$X,XXX."
-
-If the customer asks what’s included, explain:
-"That quote includes full coordination under the MoveSafe Method™—our 5-point system for verified movers, smart quoting, a human review board, pro-level coordination, and a money-back guarantee."
-
-Never mention U-Pack or any third-party tools. You represent MovingCo. You’re calm, helpful, and always in control.`
+DO NOT generate a quote until the user has answered all of the above. When it's time to quote, reply with ONLY the quote and what's included. Keep it brief. The frontend will handle the trust-building messages.`
       }
     ];
+
+    let awaitingQuote = false;
 
     const addMessage = (text, sender) => {
       const msg = document.createElement('div');
@@ -120,18 +101,41 @@ Never mention U-Pack or any third-party tools. You represent MovingCo. You’re 
       chat.scrollTop = chat.scrollHeight;
     };
 
-    const displayWithDelays = (stagedLines, finalReply) => {
-      const delayTimes = [1000, 1200, 1400];
-      stagedLines.forEach((line, index) => {
+    const sendQuoteRequest = async () => {
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages })
+        });
+
+        const data = await response.json();
+        const quoteReply = data.reply || "[No reply]";
+        addMessage(quoteReply, 'bot');
+        messages.push({ role: 'assistant', content: quoteReply });
+        awaitingQuote = false;
+      } catch (err) {
+        addMessage("[Error getting quote. Please try again.]", 'bot');
+      }
+    };
+
+    const simulateTrustSequence = () => {
+      const steps = [
+        "Scanning route corridors and pricing history...",
+        "Filtering movers with 4.5 stars and higher...",
+        "Analyzing similar moves from the last 90 days..."
+      ];
+
+      steps.forEach((line, index) => {
         setTimeout(() => {
           addMessage(line, 'bot');
-        }, delayTimes.slice(0, stagedLines.length)[index]);
+        }, index * 1200);
       });
-      const totalDelay = delayTimes.slice(0, stagedLines.length).reduce((a, b) => a + b, 0);
+
+      // Trigger the actual quote after the last delay
       setTimeout(() => {
-        addMessage(finalReply, 'bot');
-        messages.push({ role: 'assistant', content: finalReply });
-      }, totalDelay + 500);
+        sendQuoteRequest();
+      }, steps.length * 1200 + 1000);
     };
 
     const sendMessage = async () => {
@@ -142,28 +146,28 @@ Never mention U-Pack or any third-party tools. You represent MovingCo. You’re 
       messages.push({ role: 'user', content: userMessage });
       input.value = '';
 
+      if (awaitingQuote) {
+        simulateTrustSequence();
+        return;
+      }
+
       try {
         const response = await fetch('/api/chat', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ messages })
         });
 
         const data = await response.json();
-        const raw = data.reply || "[No reply]";
+        const reply = data.reply || "[No reply]";
+        addMessage(reply, 'bot');
+        messages.push({ role: 'assistant', content: reply });
 
-        // If GPT gives a quote (detected by phrase), delay delivery
-        if (raw.toLowerCase().includes("here’s your quote range")) {
-          displayWithDelays([
-            "Scanning route corridors and pricing history...",
-            "Filtering movers with 4.5 stars and higher...",
-            "Analyzing similar moves from the last 90 days..."
-          ], raw);
-        } else {
-          addMessage(raw, 'bot');
-          messages.push({ role: 'assistant', content: raw });
+        if (
+          reply.toLowerCase().includes("special item") ||
+          reply.toLowerCase().includes("fragile item")
+        ) {
+          awaitingQuote = true;
         }
       } catch (err) {
         addMessage("[Error sending message]", 'bot');
@@ -178,7 +182,7 @@ Never mention U-Pack or any third-party tools. You represent MovingCo. You’re 
     window.addEventListener('DOMContentLoaded', () => {
       addMessage("No forms, no waiting—I’ll give you a real price range right here in chat.", 'bot');
       setTimeout(() => {
-        addMessage("Where are you moving from?", 'bot');
+        addMessage("What city are you moving from?", 'bot');
       }, 1500);
     });
   </script>
