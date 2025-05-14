@@ -34,7 +34,8 @@ function handleAIFlow() {
       appendMessage(questions[stage]);
       stage++;
     }, 500);
-  } else if (!quoteRevealed) {
+  } else if (!quoteRevealed && chatHistory.length >= questions.length) {
+    // Proceed to recap, trust builder, and quote
     setTimeout(() => {
       appendMessage("Here’s what I’ve got for your move so far:");
       appendMessage(`• Size: ${chatHistory[0]}
@@ -69,7 +70,6 @@ function handleAIFlow() {
               reserveBtn.textContent = "Reserve My Move for $85";
               reserveBtn.onclick = () => {
                 appendMessage("Awesome. We’ll collect your info and get your call scheduled.");
-                // Placeholder for Stripe or confirmation flow
               };
               chatMessages.appendChild(reserveBtn);
             }, 1000);
@@ -87,17 +87,12 @@ sendBtn.addEventListener('click', async () => {
 
   appendMessage(message, 'user');
   sendSound.play();
-  chatHistory.push(message);
   userInput.value = '';
 
-  handleAIFlow();
+  // Only push to history if we're still in question flow
+  if (stage <= questions.length) {
+    chatHistory.push(message);
+  }
 
-  // Optional API call if you want to pass history to OpenAI later
-  // const response = await fetch('/api/chat', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ messages: chatHistory })
-  // });
-  // const data = await response.json();
-  // appendMessage(data.reply || "OK, let's keep going...");
+  handleAIFlow();
 });
