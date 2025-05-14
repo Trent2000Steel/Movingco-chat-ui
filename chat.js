@@ -1,105 +1,35 @@
 
-document.addEventListener("DOMContentLoaded", () => {
-  const sendBtn = document.getElementById('send-btn');
-  const userInput = document.getElementById('user-input');
-  const chatMessages = document.getElementById('chat-messages');
-  const sendSound = document.getElementById('send-sound');
-  const botSound = document.getElementById('bot-sound');
-  const ctaSound = document.getElementById('cta-sound');
+import { OpenAI } from "openai";
 
-  let chatHistory = [];
-  let stage = 0;
-  let quoteRevealed = false;
-
-  const questions = [
-    "Got it. How many bedrooms are we working with?",
-    "And where are you moving from? (Just the city or zip is fine.)",
-    "Where are you headed? (City or zip works here too.)",
-    "When are you planning to move?",
-    "Do you need help with loading, unloading, or both?",
-    "Last thing—are there any special or fragile items that matter to you? (Like a piano, safe, art, or antiques?)"
-  ];
-
-  function appendMessage(text, sender = 'bot') {
-    const msg = document.createElement('div');
-    msg.className = sender;
-    msg.textContent = text;
-    chatMessages.appendChild(msg);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    if (sender === 'bot') botSound.play();
-  }
-
-  function handleAIFlow() {
-    if (stage < questions.length) {
-      setTimeout(() => {
-        appendMessage(questions[stage]);
-        stage++;
-      }, 500);
-    } else if (!quoteRevealed && chatHistory.length >= questions.length) {
-      setTimeout(() => {
-        appendMessage("Here’s what I’ve got for your move so far:");
-        appendMessage(`• Size: ${chatHistory[0]}
-• From: ${chatHistory[1]}
-• To: ${chatHistory[2]}
-• Move date: ${chatHistory[3]}
-• Service: ${chatHistory[4]}
-• Special item(s): ${chatHistory[5] || 'None'}`);
-
-        const trustMessages = [
-          "Checking recent route history and fuel rates…",
-          "Filtering movers who’ve completed similar routes with 4.5+ ratings…",
-          "Looking at past 90 days of pricing data for similar moves…"
-        ];
-        trustMessages.forEach((msg, i) => {
-          setTimeout(() => appendMessage(msg), 1000 * (i + 1));
-        });
-
-        setTimeout(() => {
-          appendMessage("Your estimated price range is between $4,600 and $5,200.");
-          const ctaBtn = document.createElement('button');
-          ctaBtn.textContent = "Show Me How It Works";
-          ctaBtn.onclick = () => {
-            if (!quoteRevealed) {
-              ctaSound.play();
-              quoteRevealed = true;
-              appendMessage("Here’s how we work:");
-              appendMessage("• Verified movers with proven track records\n• Flat-rate pricing confirmed after we review your photos\n• A concierge coordinator to guide every step\n• Pre-move photo review so the crew shows up prepared\n• Ongoing support before, during, and after your move");
-
-              setTimeout(() => {
-                const reserveBtn = document.createElement('button');
-                reserveBtn.textContent = "Reserve My Move for $85";
-                reserveBtn.onclick = () => {
-                  appendMessage("Awesome. We’ll collect your info and get your call scheduled.");
-                };
-                chatMessages.appendChild(reserveBtn);
-              }, 1000);
-            }
-          };
-          chatMessages.appendChild(ctaBtn);
-        }, 4500);
-      }, 1000);
-    }
-  }
-
-  sendBtn.addEventListener('click', async () => {
-    const message = userInput.value.trim();
-    if (!message) return;
-
-    appendMessage(message, 'user');
-    sendSound.play();
-    userInput.value = '';
-
-    if (stage <= questions.length) {
-      chatHistory.push(message);
-    }
-
-    handleAIFlow();
-  });
-
-  // Initial greeting and first question
-  appendMessage("No forms. No waiting. I’ll give you a real long-distance price range right here in chat. Just tell me about your move.");
-  setTimeout(() => {
-    appendMessage(questions[stage]);
-    stage++;
-  }, 1000);
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
 });
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { messages } = req.body;
+
+  if (!messages || !Array.isArray(messages)) {
+    return res.status(400).json({ error: "Invalid messages format" });
+  }
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        { role: "system", content: "You are a calm, confident, and professional moving concierge. Your job is to put the customer at ease, ask the right follow-up questions, and provide a quote estimate when ready. Speak naturally, like a real person, not a chatbot." },
+        ...messages
+      ],
+      temperature: 0.7
+    });
+
+    const reply = completion.choices[0]?.message?.content;
+    res.status(200).json({ reply });
+  } catch (error) {
+    console.error("OpenAI API error:", error);
+    res.status(500).json({ error: "Failed to generate chat response" });
+  }
+}
