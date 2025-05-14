@@ -1,35 +1,65 @@
 
-import { OpenAI } from "openai";
+document.addEventListener("DOMContentLoaded", () => {
+  const sendBtn = document.getElementById("send-btn");
+  const userInput = document.getElementById("user-input");
+  const chatMessages = document.getElementById("chat-messages");
+  const sendSound = document.getElementById("send-sound");
+  const botSound = document.getElementById("bot-sound");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  const messages = [
+    {
+      role: "system",
+      content:
+        "You are a calm, confident, and professional moving concierge. Your job is to put the customer at ease, ask the right follow-up questions, and provide a quote estimate when ready. Speak naturally, like a real person, not a chatbot.",
+    },
+  ];
+
+  function appendMessage(text, sender = "bot") {
+    const msg = document.createElement("div");
+    msg.className = sender;
+    msg.textContent = text;
+    chatMessages.appendChild(msg);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    if (sender === "bot") botSound.play();
+  }
+
+  async function sendToGPT(message) {
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages }),
+      });
+
+      const data = await response.json();
+      if (data.reply) {
+        messages.push({ role: "assistant", content: data.reply });
+        appendMessage(data.reply, "bot");
+      } else {
+        appendMessage("Sorry, something went wrong.", "bot");
+      }
+    } catch (err) {
+      console.error("GPT fetch error:", err);
+      appendMessage("There was an error talking to the assistant.", "bot");
+    }
+  }
+
+  sendBtn.addEventListener("click", async () => {
+    const input = userInput.value.trim();
+    if (!input) return;
+
+    appendMessage(input, "user");
+    sendSound.play();
+    messages.push({ role: "user", content: input });
+    userInput.value = "";
+
+    await sendToGPT(input);
+  });
+
+  // Opening line
+  appendMessage(
+    "No forms. No waiting. I’ll give you a real long-distance price range right here in chat. Just tell me about your move."
+  );
 });
-
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const { messages } = req.body;
-
-  if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: "Invalid messages format" });
-  }
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        { role: "system", content: "You are a calm, confident, and professional moving concierge. Your job is to put the customer at ease, ask the right follow-up questions, and provide a quote estimate when ready. Speak naturally, like a real person, not a chatbot." },
-        ...messages
-      ],
-      temperature: 0.7
-    });
-
-    const reply = completion.choices[0]?.message?.content;
-    res.status(200).json({ reply });
-  } catch (error) {
-    console.error("OpenAI API error:", error);
-    res.status(500).json({ error: "Failed to generate chat response" });
-  }
-}
