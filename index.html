@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MovingCo – Long-Distance Moving Concierge</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, sans-serif;
+      background: linear-gradient(to bottom, #ffffff, #f7f8fa);
+      color: #222;
+    }
+    .header {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid #e0e0e0;
+      background-color: #fff;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .subtitle {
+      font-size: 16px;
+      color: #555;
+      margin-top: 5px;
+    }
+    .guarantee {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #0077cc;
+      font-weight: 600;
+    }
+    #chat-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: calc(100vh - 220px);
+      padding: 20px;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 640px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      height: 100%;
+    }
+    .chat-messages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 10px;
+    }
+    .chat-input input {
+      flex-grow: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .chat-input button {
+      margin-left: 10px;
+      padding: 10px 16px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #f2f2f2;
+      font-size: 14px;
+    }
+    footer a {
+      color: #0077cc;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+    .trust-strip {
+      text-align: center;
+      padding: 10px 20px;
+      background: #f9f9f9;
+      font-size: 14px;
+      color: #333;
+      border-top: 1px solid #e0e0e0;
+    }
+    .bot, .user {
+      margin: 6px 0;
+    }
+    .bot {
+      color: #333;
+    }
+    .user {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">MOVING•CO</div>
+    <p class="subtitle">Stress-Free Long-Distance Moves. Backed by the MoveSafe Method™.</p>
+    <p class="guarantee">We take the risk, not you. Money-back guarantee.</p>
+  </header>
+
+  <main id="chat-section">
+    <div class="chat-container">
+      <div id="chat-messages" class="chat-messages"></div>
+      <div class="chat-input">
+        <input type="text" id="user-input" placeholder="Send a message..." />
+        <button id="send-btn">➤</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="trust-strip">
+    MoveSafe Verified™ | Stripe Secure Payment | 100% Money-Back Guarantee
+  </div>
+
+  <footer>
+    <a href="terms.html">Terms of Service</a> |
+    <a href="privacy.html">Privacy Policy</a>
+  </footer>
+
+  <audio id="send-sound" src="sounds/702932__elgamer7876__send-message.wav"></audio>
+  <audio id="bot-sound" src="sounds/764857__bowlingballout__attention-signal-tone.wav"></audio>
+  <audio id="cta-sound" src="sounds/109663__grunz__success_low.wav"></audio>
+
+  <script>
+    const sendBtn = document.getElementById('send-btn');
+    const userInput = document.getElementById('user-input');
+    const chatMessages = document.getElementById('chat-messages');
+    const sendSound = document.getElementById('send-sound');
+    const botSound = document.getElementById('bot-sound');
+    const ctaSound = document.getElementById('cta-sound');
+    let quoteRevealed = false;
+
+    function appendMessage(text, sender = 'bot') {
+      const msg = document.createElement('div');
+      msg.className = sender;
+      msg.textContent = text;
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      if (sender === 'bot') botSound.play();
+    }
+
+    sendBtn.addEventListener('click', () => {
+      const message = userInput.value.trim();
+      if (!message) return;
+      appendMessage(message, 'user');
+      sendSound.play();
+      userInput.value = '';
+
+      setTimeout(() => {
+        appendMessage("Thanks! Let me check a few things for your quote...");
+        if (!quoteRevealed) {
+          setTimeout(() => {
+            appendMessage("Your estimated price range is $4,600–$5,200.");
+            const ctaBtn = document.createElement('button');
+            ctaBtn.textContent = "Show Me How It Works";
+            ctaBtn.onclick = () => {
+              if (!quoteRevealed) {
+                ctaSound.play();
+                quoteRevealed = true;
+                appendMessage("Here’s how we work:\n• Flat-rate after review\n• Verified movers\n• Concierge support\n• MoveSafe Method™ in action.");
+              }
+            };
+            chatMessages.appendChild(ctaBtn);
+          }, 2000);
+        }
+      }, 1500);
+    });
+  </script>
+
+</body>
+</html>
