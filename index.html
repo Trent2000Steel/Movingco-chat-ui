@@ -138,51 +138,7 @@
   <audio id="bot-sound" src="sounds/764857__bowlingballout__attention-signal-tone.wav"></audio>
   <audio id="cta-sound" src="sounds/109663__grunz__success_low.wav"></audio>
 
-  <script>
-    const sendBtn = document.getElementById('send-btn');
-    const userInput = document.getElementById('user-input');
-    const chatMessages = document.getElementById('chat-messages');
-    const sendSound = document.getElementById('send-sound');
-    const botSound = document.getElementById('bot-sound');
-    const ctaSound = document.getElementById('cta-sound');
-    let quoteRevealed = false;
-
-    function appendMessage(text, sender = 'bot') {
-      const msg = document.createElement('div');
-      msg.className = sender;
-      msg.textContent = text;
-      chatMessages.appendChild(msg);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      if (sender === 'bot') botSound.play();
-    }
-
-    sendBtn.addEventListener('click', () => {
-      const message = userInput.value.trim();
-      if (!message) return;
-      appendMessage(message, 'user');
-      sendSound.play();
-      userInput.value = '';
-
-      setTimeout(() => {
-        appendMessage("Thanks! Let me check a few things for your quote...");
-        if (!quoteRevealed) {
-          setTimeout(() => {
-            appendMessage("Your estimated price range is $4,600–$5,200.");
-            const ctaBtn = document.createElement('button');
-            ctaBtn.textContent = "Show Me How It Works";
-            ctaBtn.onclick = () => {
-              if (!quoteRevealed) {
-                ctaSound.play();
-                quoteRevealed = true;
-                appendMessage("Here’s how we work:\n• Flat-rate after review\n• Verified movers\n• Concierge support\n• MoveSafe Method™ in action.");
-              }
-            };
-            chatMessages.appendChild(ctaBtn);
-          }, 2000);
-        }
-      }, 1500);
-    });
-  </script>
+  <script src="chat.js"></script>
 
 </body>
 </html>
