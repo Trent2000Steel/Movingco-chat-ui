@@ -23,8 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (sender === "bot") botSound.play();
   }
 
-  async function sendToGPT(message) {
+  async function sendToGPT() {
     try {
+      console.log("Sending to GPT:", messages);
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -34,14 +35,16 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const data = await response.json();
+      console.log("GPT Response:", data);
+
       if (data.reply) {
         messages.push({ role: "assistant", content: data.reply });
         appendMessage(data.reply, "bot");
       } else {
-        appendMessage("Sorry, something went wrong.", "bot");
+        appendMessage("Sorry, no response from GPT.", "bot");
       }
     } catch (err) {
-      console.error("GPT fetch error:", err);
+      console.error("Error talking to GPT:", err);
       appendMessage("There was an error talking to the assistant.", "bot");
     }
   }
@@ -55,10 +58,10 @@ document.addEventListener("DOMContentLoaded", () => {
     messages.push({ role: "user", content: input });
     userInput.value = "";
 
-    await sendToGPT(input);
+    await sendToGPT();
   });
 
-  // Opening line
+  // Start the conversation
   appendMessage(
     "No forms. No waiting. I’ll give you a real long-distance price range right here in chat. Just tell me about your move."
   );
