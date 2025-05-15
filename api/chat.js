@@ -1,52 +1,25 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const sendBtn = document.getElementById("send-btn");
-  const userInput = document.getElementById("user-input");
-  const chatMessages = document.getElementById("chat-messages");
+import { OpenAI } from "openai";
 
-  const messages = [
-    {
-      role: "system",
-      content:
-        "You are a calm, confident, professional moving concierge. Make the customer feel at ease. Ask follow-up questions before quoting. Sound like a real human, not a bot.",
-    },
-  ];
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  function appendMessage(text, sender = "bot") {
-    const msg = document.createElement("div");
-    msg.className = sender;
-    msg.textContent = text;
-    chatMessages.appendChild(msg);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method not allowed" });
   }
 
-  async function sendToGPT() {
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages }),
-      });
-      const data = await response.json();
-      if (data.reply) {
-        messages.push({ role: "assistant", content: data.reply });
-        appendMessage(data.reply, "bot");
-      } else {
-        appendMessage("No response from assistant.", "bot");
-      }
-    } catch (err) {
-      appendMessage("Error talking to assistant.", "bot");
-    }
+  const { messages } = req.body;
+
+  try {
+    const chat = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: messages,
+      temperature: 0.7,
+    });
+
+    const reply = chat.choices[0].message.content;
+    res.status(200).json({ reply });
+  } catch (err) {
+    console.error("OpenAI error:", err);
+    res.status(500).json({ message: "API error" });
   }
-
-  sendBtn.addEventListener("click", async () => {
-    const input = userInput.value.trim();
-    if (!input) return;
-    appendMessage(input, "user");
-    messages.push({ role: "user", content: input });
-    userInput.value = "";
-    await sendToGPT();
-  });
-
-  // Optional welcome message
-  appendMessage("No forms. No waiting. Just tell me about your move.");
-});
+}
