@@ -1,4 +1,4 @@
-console.log("chat.js loaded");
+alert("Script is loading");
 document.addEventListener("DOMContentLoaded", () => {
   const sendBtn = document.getElementById("send-btn");
   const userInput = document.getElementById("user-input");
