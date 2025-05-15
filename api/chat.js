@@ -1,4 +1,3 @@
-alert("Script is loading");
 document.addEventListener("DOMContentLoaded", () => {
   const sendBtn = document.getElementById("send-btn");
   const userInput = document.getElementById("user-input");
@@ -8,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       role: "system",
       content:
-        "You are a calm, confident, and professional moving concierge. Your job is to put the customer at ease, ask the right follow-up questions, and provide a quote estimate when ready. Speak naturally, like a real person, not a chatbot.",
+        "You are a calm, confident, professional moving concierge. Make the customer feel at ease. Ask follow-up questions before quoting. Sound like a real human, not a bot.",
     },
   ];
 
@@ -22,43 +21,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function sendToGPT() {
     try {
-      console.log("Sending to GPT:", messages);
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages }),
       });
-
       const data = await response.json();
-      console.log("GPT Response:", data);
-
       if (data.reply) {
         messages.push({ role: "assistant", content: data.reply });
         appendMessage(data.reply, "bot");
       } else {
-        appendMessage("Sorry, no response from GPT.", "bot");
+        appendMessage("No response from assistant.", "bot");
       }
     } catch (err) {
-      console.error("Error talking to GPT:", err);
-      appendMessage("There was an error talking to the assistant.", "bot");
+      appendMessage("Error talking to assistant.", "bot");
     }
   }
 
   sendBtn.addEventListener("click", async () => {
     const input = userInput.value.trim();
     if (!input) return;
-
     appendMessage(input, "user");
     messages.push({ role: "user", content: input });
     userInput.value = "";
-
     await sendToGPT();
   });
 
-  // Start the conversation
-  appendMessage(
-    "No forms. No waiting. I’ll give you a real long-distance price range right here in chat. Just tell me about your move."
-  );
+  // Optional welcome message
+  appendMessage("No forms. No waiting. Just tell me about your move.");
 });
